@@ -1,0 +1,39 @@
+agents:
+  sandbox.jl: true
+
+steps:
+  - label: "Upload the system image to S3"
+    # Upload the sysimage on tag releases
+    if: |
+      build.tag != null
+    key: upload-sysimg
+    depends_on:
+      - build-sysimg
+    plugins:
+      - staticfloat/ssh-agent:
+          keyvars:
+            - "GITHUB_SSH_KEY"
+      - staticfloat/cryptic:
+          variables:
+            - AWS_ACCESS_KEY_ID="U2FsdGVkX18yQSOzn3IL8h811L88TP8GMy41cJ5Tq5+RTbJtuo+x6VeyJQf9HOwG"
+            - AWS_SECRET_ACCESS_KEY="U2FsdGVkX1+BwOKiyQTAE1Gpw07RTgh6iLA+xeEKHqAMrfDK4lJx4g09eDAd8NvF9v2mPd0ZvpkWE495sF2F2A=="
+      - JuliaCI/julia#v1:
+          version: 1
+      - staticfloat/sandbox:
+          rootfs_url: "https://jc-rootfs-images.s3.amazonaws.com/aws_upload.x86_64.tar.gz"
+          rootfs_treehash: "cb496f91f082826a67d6cd7d031d5f571865603b"
+          verbose: true
+    commands: |
+      buildkite-agent artifact download *.tar.gz .
+      sysimage=$$(echo *.tar.gz)
+      aws s3 cp $${sysimage} s3://jc-juliaspice-systemimages/$${sysimage}
+      tar -xvzf $${sysimage}
+      mv cedar_sysimg/*.so cedar_sysimg/CedarSysimg_latest.so
+      tar -czvf "CedarSysimg_latest.tar.gz" cedar_sysimg
+      aws s3 cp CedarSysimg_latest.tar.gz s3://jc-juliaspice-systemimages/CedarSysimg_latest.tar.gz
+
+env:
+  # Receive SSH key from parent job
+  GITHUB_SSH_KEY: ${GITHUB_SSH_KEY?}
+  # This is a child pipeline, so we MUST put this here to inherit privileges from the parent pipeline.
+  BUILDKITE_PLUGIN_CRYPTIC_BASE64_SIGNED_JOB_ID_SECRET: ${BUILDKITE_PLUGIN_CRYPTIC_BASE64_SIGNED_JOB_ID_SECRET?}

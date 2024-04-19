@@ -1,0 +1,8 @@
+#!/bin/bash
+
+declare -A DOWNSTREAMS
+
+# To add more downstream repos, use the form DOWNSTREAMS["$name"]="$url"
+# Always use a `git` clone url for the url.  We don't auto-calculate them
+# here in case we eventually want to support downstreams outside of the JC org
+# DOWNSTREAMS["AnalogCircuitSimEnv.jl"]="git@github.com:JuliaComputing/AnalogCircuitSimEnv.jl.git"

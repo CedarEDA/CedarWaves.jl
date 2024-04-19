@@ -1,0 +1,50 @@
+agents:
+  sandbox.jl: true
+
+steps:
+  - label: ":construction: Create the system image"
+    if: build.message =~ /\[build sysimage\]/
+    key: build-sysimg
+    # Receive SSH key from parent job
+    env:
+      GITHUB_SSH_KEY: ${GITHUB_SSH_KEY?}
+    plugins:
+      - staticfloat/ssh-agent:
+          keyvars:
+            - "GITHUB_SSH_KEY"
+      # Install julia outside of the sandbox, so that the sandbox itself works at all
+      - JuliaCI/julia#v1:
+          version: 1
+      # Use `sandbox` to provide a rootfs with all necessary libs for SciML-benchmark-kind of jobs
+      - staticfloat/sandbox:
+          rootfs_url: "https://github.com/ven-k/Placeholder/releases/download/v0.10.0/stretch_kitchen_sink.x86_64.tar.gz"
+          rootfs_treehash: "8ddf9ec6c0b6d8d8b6fc0f800b6b5e3b8aa278b5"
+      # Install Julia inside of the sandbox
+      - JuliaCI/julia#v1:
+          version: 1
+    commands: |
+      echo "--- Print version info"
+      julia -e 'using InteractiveUtils;
+                versioninfo()'
+      gcc --version
+      shopt -s extglob
+
+      echo "--- Instantiate project"
+      julia --project=. .buildkite/commands/instantiate.jl
+
+      echo "+++ Print out depot path:"
+      julia -e 'using Pkg; println(Pkg.depots1())'
+
+      echo "+++ Compile sys image"
+      project_url=$(git config --get remote.origin.url)
+      project_rev=$(git rev-parse HEAD)
+      julia --project=. .buildkite/commands/create_image.jl $${project_url} $${project_rev}
+      mkdir -p cedar_sysimg/artifacts
+      project_version=$$(julia -e 'using TOML; print(TOML.parsefile("Project.toml")["version"])')
+      mv CedarSysimg_$${project_version}.so cedar_sysimg
+      cp -r PinnedProject StdlibPackages cedar_sysimg
+      cp -r $${JULIA_DEPOT_PATH}/artifacts/!(9c4389d9a4a533e9b3007b9cb9f50755224bc5c7) cedar_sysimg/artifacts
+      tar -czvf "CedarSysimg_$${project_version}.tar.gz" cedar_sysimg
+
+    artifact_paths:
+      - CedarSysimg*.tar.gz

@@ -1,0 +1,10 @@
+name = "benchmark"
+uuid = "e54b8a96-bea3-46cb-be69-042bc20cab87"
+authors = ["Glen Hertz <glen.hertz@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+CedarWaves = "361f1f8b-9353-4122-8fb9-15bd988babab"
+DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
+PkgBenchmark = "32113eaa-f34f-5b0d-bd6c-c81e245fc73d"

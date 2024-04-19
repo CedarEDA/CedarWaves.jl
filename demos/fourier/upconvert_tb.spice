@@ -1,0 +1,237 @@
+**.subckt upconvert_tb
+XMcurr_p net1 g_p GND GND sky130_fd_pr__nfet_01v8_lvt L=1.00 W=10 nf=2 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=8 m=8 
+XMdiff_pp out_p loo_p net1 GND sky130_fd_pr__nfet_01v8_lvt L=0.15 W=4.00 nf=1 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=2 m=2 
+XMdiff_pn1 out_n loo_n net1 GND sky130_fd_pr__nfet_01v8_lvt L=0.15 W=4.00 nf=1 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=2 m=2 
+XMcurr_n net2 g_n GND GND sky130_fd_pr__nfet_01v8_lvt L=1.00 W=10 nf=2 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=8 m=8 
+XMdiff_np out_p loo_n net2 GND sky130_fd_pr__nfet_01v8_lvt L=0.15 W=4.00 nf=1 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=2 m=2 
+XMdiff_nn out_n loo_p net2 GND sky130_fd_pr__nfet_01v8_lvt L=0.15 W=4.00 nf=1 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=2 m=2 
+XMmirror_n g_n g_n GND GND sky130_fd_pr__nfet_01v8_lvt L=1.00 W=10 nf=2 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=2 m=2 
+XMmirror_p g_p g_p GND GND sky130_fd_pr__nfet_01v8_lvt L=1.00 W=10 nf=2 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=2 m=2 
+V1 vdd GND 1.8
+I0 vdd g_n 200u
+I1 vdd g_p 200u
+I2 g_p g_n sin(0 65u 10Meg)
+V2 LO_p GND sin(1.3 0.5 8000Meg)
+V3 LO_n GND sin(1.3 -0.5 8000Meg)
+x1 vdd out_n out_p GND upconvert_inductor
+x2 vdd in_p net3 in_n net4 GND lc_oscillator
+Ibias vdd net4 40u
+Vctl net3 GND 0.9
+x3 vdd in_p in_n loo_p loo_n GND net5 vdd lc_oscillator_buffer
+Ibias1 vdd net5 20u
+x4 vdd out_p out_n buffer_p buffer_n GND net6 vdd lc_oscillator_buffer
+Ibias2 vdd net6 20u
+**** begin user architecture code
+
+
+.param temp=27
+
+.tran 1p 300n uic
+
+.save all
+
+
+
+
+.options wnflag=1
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.inc /usr/local/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  upconvert_inductor/upconvert_inductor.sym # of pins=4
+* sym_path: /home/tom/repositories/ic/amsat_txrx_ic/design/upconvert_inductor/upconvert_inductor.sym
+* sch_path: /home/tom/repositories/ic/amsat_txrx_ic/design/upconvert_inductor/upconvert_inductor.sch
+.subckt upconvert_inductor  com p2 p1 sub
+*.iopin p2
+*.iopin p1
+*.iopin sub
+*.iopin com
+L1 net1 p1 1.77n m=1
+C1 p1 net2 37.915f m=1
+R1 net2 sub 15.75 m=1
+C2 p1 com 152f m=1
+R3 com net1 6.225 m=1
+L2 net4 p2 1.77n m=1
+C4 p2 net5 37.915f m=1
+R4 net5 sub 15.75 m=1
+C5 p2 com 152f m=1
+R6 com net4 6.225 m=1
+C3 com net3 37.915f m=1
+R2 net3 sub 15.75 m=1
+C6 com net6 37.915f m=1
+R5 net6 sub 15.75 m=1
+.ends
+
+
+* expanding   symbol:  lc_oscillator/lc_oscillator.sym # of pins=6
+* sym_path: /home/tom/repositories/ic/amsat_txrx_ic/design/lc_oscillator/lc_oscillator.sym
+* sch_path: /home/tom/repositories/ic/amsat_txrx_ic/design/lc_oscillator/lc_oscillator.sch
+.subckt lc_oscillator  vdd out_p vctl out_n bias_20u_p vss
+*.ipin vctl
+*.iopin vss
+*.ipin bias_20u_p
+*.iopin vdd
+*.opin out_p
+*.opin out_n
+x3 vdd out_p out_n vss lc_oscillator_inductor_diff
+x4 vdd out_p vctl out_n bias_20u_p vss lc_oscillator_core
+.ends
+
+
+* expanding   symbol:  lc_oscillator_buffer/lc_oscillator_buffer.sym # of pins=8
+* sym_path:
+*+ /home/tom/repositories/ic/amsat_txrx_ic/design/lc_oscillator_buffer/lc_oscillator_buffer.sym
+* sch_path:
+*+ /home/tom/repositories/ic/amsat_txrx_ic/design/lc_oscillator_buffer/lc_oscillator_buffer.sch
+.subckt lc_oscillator_buffer  vdd in_p in_n out_p out_n vss bias_20u en
+*.iopin vss
+*.iopin vdd
+*.opin out_p
+*.opin out_n
+*.ipin bias_20u
+*.ipin in_p
+*.ipin in_n
+*.ipin en
+XM1 vdd in_p out_p vss sky130_fd_pr__nfet_01v8_lvt L=0.15 W=50 nf=10 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1 
+XM2 vdd in_n out_n vss sky130_fd_pr__nfet_01v8_lvt L=0.15 W=50 nf=10 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1 
+XM5 out_n curr_bias vss vss sky130_fd_pr__nfet_01v8_lvt L=0.15 W=1 nf=1 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=50 m=50 
+XM7 curr_bias curr_bias vss vss sky130_fd_pr__nfet_01v8_lvt L=0.15 W=1 nf=1 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1 
+XM8 out_p curr_bias vss vss sky130_fd_pr__nfet_01v8_lvt L=0.15 W=1 nf=1 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=50 m=50 
+x2 en vss vss vdd vdd en_n sky130_fd_sc_hd__inv_1
+x3 en_n vss vss vdd vdd en_buf sky130_fd_sc_hd__inv_1
+XMen_pass bias_20u en_buf curr_bias vss sky130_fd_pr__nfet_01v8_lvt L=0.15 W=1 nf=1 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1 
+XMen_a curr_bias en_n vss vss sky130_fd_pr__nfet_01v8_lvt L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1 
+XMen_a1 out_n en_n vss vss sky130_fd_pr__nfet_01v8_lvt L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1 
+XMen_d out_p en_buf vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1 
+XMdum vss curr_bias vss vss sky130_fd_pr__nfet_01v8_lvt L=0.15 W=1 nf=1 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=2 m=2 
+.ends
+
+
+* expanding   symbol:  lc_oscillator_inductor_diff/lc_oscillator_inductor_diff.sym # of pins=4
+* sym_path:
+*+ /home/tom/repositories/ic/amsat_txrx_ic/design/lc_oscillator_inductor_diff/lc_oscillator_inductor_diff.sym
+* sch_path:
+*+ /home/tom/repositories/ic/amsat_txrx_ic/design/lc_oscillator_inductor_diff/lc_oscillator_inductor_diff.sch
+.subckt lc_oscillator_inductor_diff  common positive negative sub
+*.iopin common
+*.iopin positive
+*.iopin sub
+*.iopin negative
+xlneg common negative sub lc_oscillator_inductor
+xlpos common positive sub lc_oscillator_inductor
+.ends
+
+
+* expanding   symbol:  lc_oscillator_core/lc_oscillator_core.sym # of pins=6
+* sym_path: /home/tom/repositories/ic/amsat_txrx_ic/design/lc_oscillator_core/lc_oscillator_core.sym
+* sch_path: /home/tom/repositories/ic/amsat_txrx_ic/design/lc_oscillator_core/lc_oscillator_core.sch
+.subckt lc_oscillator_core  vdd ind_p vctl ind_n bias_20u_p vss
+*.ipin vctl
+*.iopin vss
+*.ipin bias_20u_p
+*.iopin vdd
+*.iopin ind_n
+*.iopin ind_p
+XM2 bias_20u_p bias_20u_p vss vss sky130_fd_pr__nfet_01v8_lvt L=0.5 W=5 nf=1 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=2 m=2 
+XM1 net3 bias_20u_p vss vss sky130_fd_pr__nfet_01v8_lvt L=0.5 W=5 nf=1 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=32 m=32 
+XM3 net3 bias_20u_p vss vss sky130_fd_pr__nfet_01v8_lvt L=0.5 W=5 nf=1 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=32 m=32 
+XC1 ind_p net2 sky130_fd_pr__cap_mim_m3_1 W=6 L=6 MF=4 m=4
+XC2 ind_n net1 sky130_fd_pr__cap_mim_m3_1 W=6 L=6 MF=4 m=4
+XC3 net2 net4 sky130_fd_pr__cap_mim_m3_1 W=6 L=6 MF=1 m=1
+XC4 net1 net4 sky130_fd_pr__cap_mim_m3_1 W=6 L=6 MF=1 m=1
+XM4 ind_p vdd net2 vss sky130_fd_pr__nfet_01v8_lvt L=0.15 W=40 nf=8 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1 
+XM5 ind_n vdd net1 vss sky130_fd_pr__nfet_01v8_lvt L=0.15 W=40 nf=8 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1 
+XM6 net2 net1 net3 vss sky130_fd_pr__nfet_01v8_lvt L=0.15 W=40 nf=8 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1 
+XM7 net1 net2 net3 vss sky130_fd_pr__nfet_01v8_lvt L=0.15 W=40 nf=8 ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1 
+x1 vctl ind_p lc_oscillator_varactor
+x2 vctl ind_n lc_oscillator_varactor
+.ends
+
+
+* expanding   symbol:  lc_oscillator_inductor/lc_oscillator_inductor.sym # of pins=3
+* sym_path:
+*+ /home/tom/repositories/ic/amsat_txrx_ic/design/lc_oscillator_inductor/lc_oscillator_inductor.sym
+* sch_path:
+*+ /home/tom/repositories/ic/amsat_txrx_ic/design/lc_oscillator_inductor/lc_oscillator_inductor.sch
+.subckt lc_oscillator_inductor  p1 p2 sub
+*.iopin p2
+*.iopin p1
+*.iopin sub
+L1 net1 p1 1.028n m=1
+C1 p1 net2 62.02f m=1
+R1 net2 sub 16.03 m=1
+C2 p1 p2 0.1f m=1
+C3 p2 net3 62.31f m=1
+R2 net3 sub 15.88 m=1
+R3 p2 net1 3.6825 m=1
+.ends
+
+
+* expanding   symbol:  lc_oscillator_varactor/lc_oscillator_varactor.sym # of pins=2
+* sym_path:
+*+ /home/tom/repositories/ic/amsat_txrx_ic/design/lc_oscillator_varactor/lc_oscillator_varactor.sym
+* sch_path:
+*+ /home/tom/repositories/ic/amsat_txrx_ic/design/lc_oscillator_varactor/lc_oscillator_varactor.sch
+.subckt lc_oscillator_varactor  p m
+*.iopin p
+*.iopin m
+XM1 p m p p sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W'
++ sa=0 sb=0 sd=0 mult=1 m=1 
+.ends
+
+.GLOBAL GND
+** flattened .save nodes
+.end

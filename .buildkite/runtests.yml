@@ -1,0 +1,56 @@
+# Only run on agents that are using sandbox.jl
+agents:
+  sandbox.jl: true
+
+steps:
+  # Let's launch a job within a sandbox!
+  - label: "Test the package"
+    key: runtests
+    env:
+      GITHUB_SSH_KEY: ${GITHUB_SSH_KEY?}
+      JULIA_PKG_USE_CLI_GIT: true
+    plugins:
+      - staticfloat/ssh-agent:
+          keyvars:
+            - "GITHUB_SSH_KEY"
+      # Install Julia v1.x to run Sandbox.jl
+      - JuliaCI/julia#v1:
+          version: 1
+      - staticfloat/sandbox#v1:
+          rootfs_url: "https://github.com/JuliaCI/rootfs-images/releases/download/v4.4/agent_linux.x86_64.tar.gz"
+          rootfs_treehash: "81e406f08d77041c61c7f8731e3d016973e1fdd8"
+          workspaces:
+            # Include `/cache` so that `julia` install can properly cache its Julia downloads
+            - "/cache:/cache"
+            # Include `~/.ssh` so that we get the pre-filled `known_hosts` file
+            - "${HOME}/.ssh:/root/.ssh"
+      # Run tests
+      - JuliaCI/julia-test#v1:
+          use_ssh: true
+          extra_registries: https://github.com/JuliaComputing/JuliaSimRegistry
+
+    if: build.message !~ /\[skip tests\]/
+    timeout_in_minutes: 120
+    artifact_paths:
+      - "test/logs/*.pdf"
+
+  # We're going run downstream testing, but only if our self-tests pass
+  - wait
+
+  # We store the list of downstream projects in `downstream_projects`; edit that to add more.
+  # We use the contents of that file to template the `downstream_template.yaml` file and feed that back to buildkite.
+  - label: ":runner: Launch downstream testing"
+    env:
+      GITHUB_SSH_KEY: ${GITHUB_SSH_KEY?}
+    plugins:
+      - staticfloat/ssh-agent:
+          keyvars:
+            - "GITHUB_SSH_KEY"
+    command: |
+        source .buildkite/downstream_projects
+        for PROJECT in \${!DOWNSTREAMS[@]}; do
+            URL="\${DOWNSTREAMS["\$PROJECT"]}"
+            sed -e "s&{PROJECT}&\${PROJECT}&g" -e "s&{URL}&\${URL}&g" .buildkite/downstream_template.yaml | buildkite-agent pipeline upload
+        done
+    
+    if: build.message !~ /\[skip tests\]/
