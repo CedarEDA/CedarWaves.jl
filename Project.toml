@@ -35,7 +35,7 @@ UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 WGLMakie = "276b4fcb-3e11-5398-bf8b-a0c2d153d008"
 
 [compat]
-DataInterpolations = "4"
+DataInterpolations = "4, 5"
 DataStructures = "0.18"
 FFTA = "0.2"
 ForwardDiff = "0.10"
